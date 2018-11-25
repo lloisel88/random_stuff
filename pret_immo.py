@@ -1,48 +1,45 @@
 # import dependencies
 from matplotlib import pyplot as plt
 
-def calcul_interets(capital = 500000, taux = 0.015, annees = 20):
-    # si les intérêts remboursés décroissent linéairement de la première année à la dernière année (0,
-    # il ne reste plus de capital à rembourser donc plus d'intérêts), les intérêts totaux sont 
-    # égaux à la surface sous la décroissance linéaire, c'est à dire l'aire du triangle rectangle
-    return (annees * capital * taux) / 2 
+# calculs basés sur https://www.pretto.fr/taux-immobilier/calcul-interet/
+def mensualite(capital = 500000, taux = 0.015, annees = 20):
+    numerateur = capital * taux / 12
+    denominateur = 1 - (1 + taux / 12) ** (-12 * annees)
+    return numerateur / denominateur
 
-# print(calcul_interets(500000, 0.015, 20))
+def interets_totaux(capital, annees, mensualite):
+    return 12 * annees * mensualite - capital
 
-# plot l'augmentation des intérêts pour un prêt donné en fonction des années 
-# ann = range(15,26)
-# interets_annees = [calcul_interets(annees = i) 
-#                     for i in ann]
+capital = 500000
+taux = 0.018
+annees = 20
 
-# plt.plot(ann, interets_annees, marker = "o", linestyle = "solid")
-# plt.xlabel("Années de remboursement")
-# plt.ylabel("Montant des intérêts totaux")
-# plt.title(r"Montant des intérêts pour un prêt de 500 000 € avec un taux de 1,5% en fonction du nombre d'années")
-# plt.show()
+print("Pour un emprunt de", capital, "euros sur une durée de", annees, "années à un taux de", 
+taux, "%, la valeur de la mensualité est de:", mensualite(capital, taux, annees), 
+"euros. Les intérêts totaux à rembourser valent:", 
+interets_totaux(capital, annees, mensualite(capital, taux, annees)), "euros")
 
-# re-calcul des intérêts totaux en prenant pour point de départ l'annuité basée sur les intérêts totaux calculés
-# on veut voir si on retombe sur nos pattes (est-ce que l'hypothèse de la décroissance linéaire des intérêts à rembourser est valide)
-def calcul_interets_methode_2(capital = 500000, taux = 0.015, annees = 20):
-    # initialisation des listes utilisées
-    liste_interets_annuel = []
-    liste_capital_annuel = []
-    liste_capital_restant = []
-    # remboursement total = capital + intérêts totaux 
-    remboursement_total = capital = calcul_interets(capital, taux, annees) 
-    annuite = remboursement_total / annees
-    # au début il nous reste tout le capital à rembourser
-    capital_restant = capital 
-    # pour chaque annee, on calcule les intérêts à rembourser, basés sur le capital restant, puis le capital remboursé, enfin on met à jour le capital restant
-    for _ in range(annees):
-        interets_annuel = capital_restant * taux
-        liste_interets_annuel.append(interets_annuel)
-        capital_annuel = annuite - interets_annuel
-        liste_capital_annuel.append(capital_annuel)
-        capital_restant = capital_restant - capital_annuel 
-        liste_capital_restant.append(capital_restant)
-    return sum(liste_interets_annuel)
+# variation des mensualités et des intérêts totaux à rembourser en fonction du nombre d'années
+ann = range(15, 26)
+mensualite_annees = [mensualite(capital, taux, i)
+                        for i in ann]
+interets_annees = [interets_totaux(capital, j, mensualite(capital, taux, j))
+                        for j in ann]
 
-print(calcul_interets(), calcul_interets_methode_2())
+# plot des variations des intérêts totaux en fonction du nombre d'années de paiement
+fig, ax = plt.subplots(2, 1)
+ax[0].scatter(ann, interets_annees)
+ax[0].set_title("Variation des intérêts totaux à rembourser en fonction du nombre d'années du prêt")
+ax[0].set_ylabel("Intérêts totaux à rembourser (euros)")
+plt.xlabel("Nombre d'années de remboursement du prêt")
+ax[1].scatter(ann, mensualite_annees)
+ax[1].set_title("Variation des mensualités de remboursement en fonction du nombre d'années du prêt")
+ax[1].set_ylabel("Mensualité (euros)")
+plt.show()
 
-
-
+# Evolution du capital remboursé au cours du temps (à compléter)
+"""
+def capital_rembourse_annuel:
+    interets_annee = 0
+    return 12 * mensualite - interets_annee
+"""
